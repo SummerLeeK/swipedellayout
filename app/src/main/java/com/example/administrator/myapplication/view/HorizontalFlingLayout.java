@@ -164,11 +164,9 @@ public class HorizontalFlingLayout extends ViewGroup {
                 break;
         }
 
-//        if (mTouchState != TOUCH_STATE_REST) {
-//            return true;
-//        } else {
-//
-//        }
+        if (mTouchState != TOUCH_STATE_REST) {
+            getParent().requestDisallowInterceptTouchEvent(true);
+        }
         return mTouchState != TOUCH_STATE_REST;
     }
 
@@ -216,7 +214,6 @@ public class HorizontalFlingLayout extends ViewGroup {
 //                LogUtils.e("onTouchEvent-----ACTION_MOVE moveNeed\t" + moveNeed + "\tremainSpace\t" + remainSpace);
 //                invalidate();
                 break;
-            case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 smoothToView();

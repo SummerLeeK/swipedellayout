@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         adapter.setData(datas);
-
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        LogUtils.e("densityDpi=" + displayMetrics.densityDpi + "\t" + displayMetrics.toString());
 
 //        recycler.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
