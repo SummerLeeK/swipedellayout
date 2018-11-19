@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.myapplication.bean.NormalBean;
+import com.example.administrator.myapplication.lifecycle.LifecycleListener;
 import com.example.administrator.myapplication.recycler.adapter.NormalAdapter;
 import com.example.administrator.myapplication.recycler.layoutmanager.MyLayoutManager;
 import com.example.administrator.myapplication.statictest.StaticTest;
@@ -37,12 +38,14 @@ public class MainActivity extends AppCompatActivity {
 
     private float downX, downY;
 
+    private LifecycleListener lifecycleListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        lifecycleListener = new LifecycleListener("MainActivity");
+        getLifecycle().addObserver(lifecycleListener);
 //        tv1 = findViewById(R.id.tv1);
 //        tv2 = findViewById(R.id.tv2);
 //        tv3 = findViewById(R.id.tv3);

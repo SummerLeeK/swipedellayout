@@ -2,8 +2,10 @@ package com.example.administrator.myapplication.view;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewConfigurationCompat;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -288,6 +290,14 @@ public class HorizontalFlingLayout extends ViewGroup {
         scrollOffset += needScrollX;
 //                LogUtils.e("onTouchEvent-----ACTION_UP \t" + scrollOffset + "\tneedScrollX\t" + needScrollX + "\t" + currentX);
         invalidate();
+
+        ViewDragHelper.create(this, new ViewDragHelper.Callback() {
+            @Override
+            public boolean tryCaptureView(@NonNull View child, int pointerId) {
+
+                return false;
+            }
+        });
     }
 
 

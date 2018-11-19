@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/aidlproject/aidlproject.iml" filepath="$PROJECT_DIR$/aidlproject/aidlproject.iml" />
       <module fileurl="file://$PROJECT_DIR$/androidprojects.iml" filepath="$PROJECT_DIR$/androidprojects.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jnilib/jnilib.iml" filepath="$PROJECT_DIR$/jnilib/jnilib.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
     </modules>
   </component>
