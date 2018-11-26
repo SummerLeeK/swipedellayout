@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,7 +30,7 @@ public class AIDLService extends Service {
     private List<Book> bookList = new ArrayList<>();
     private Handler handler = new Handler();
     private LogRunnable runnable;
-
+    private Binder binder = new Binder();
     private IMyAidlInterface.Stub myAidlInterface = new IMyAidlInterface.Stub() {
         @Override
         public void addBook(Book book) throws RemoteException {

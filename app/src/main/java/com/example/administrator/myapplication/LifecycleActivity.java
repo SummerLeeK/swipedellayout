@@ -20,7 +20,6 @@ public class LifecycleActivity extends AppCompatActivity {
     LifecycleListener lifecycleListener;
 
     TextView ss;
-    Handler
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
