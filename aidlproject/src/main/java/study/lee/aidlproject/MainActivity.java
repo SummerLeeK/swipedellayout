@@ -11,9 +11,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,8 +29,22 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.List;
 
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okio.ByteString;
 import study.lee.aidlproject.helper.Book;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -43,7 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //包含Book对象的list
     private List<Book> mBooks;
 
+    private EditText et;
     private TextView addBookTv;
+
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -98,12 +117,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.intent).setOnClickListener(this);
 
-
-        socketThread = new ClientSocketThread();
-        socketThread.start();
+        et = findViewById(R.id.et);
 
         serverSocketThread = new ServerSocketThread();
         serverSocketThread.start();
+
     }
 
 
@@ -137,12 +155,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                socketThread.sendMessage();
-            }
-        }).start();
+
+        new ClientSocketThread().start();
+
 
     }
 
@@ -153,95 +168,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void run() {
             super.run();
-            init();
+            sendMessage();
         }
-
-        void init() {
-            while (socket == null || !socket.isConnected()) {
-                try {
-                    socket = new Socket("192.168.0.104", 8080);
-
-                    if (socket.isConnected()) {
-
-                        while (true) {
-                            InputStream inputStream = socket.getInputStream();
-                            if (inputStream.read() != -1) {
-                                byte[] readByte = new byte[inputStream.available()];
-                                inputStream.read(readByte);
-
-                                if (readByte != null) {
-                                    Looper.prepare();
-                                    Message message = Message.obtain();
-                                    message.obj = new String(readByte);
-                                    handler.sendMessage(message);
-                                    Looper.loop();
-                                }
-                            }
-                        }
-                    }
-
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                    Log.e("Socket", "SocketException" + e.getMessage());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("Socket", "IOException");
-                }
-            }
-        }
-
 
         void sendMessage() {
-            Log.e("clientSocket", "sendMsg 1");
-            if (socket != null && socket.isConnected()) {
-                try {
+            try {
+                socket = new Socket("192.168.0.167", 8080);
+
+                Log.e("clientSocket", "sendMsg 1");
+                if (socket != null && socket.isConnected()) {
+
 //                    OutputStream outputStream = socket.getOutputStream();
                     DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                    outputStream.writeUTF("hello");
+                    outputStream.writeUTF(et.getText().toString());
 //                    outputStream.write("hello".getBytes("utf-8"));
                     Log.e("clientSocket", "sendMsg 2");
                     outputStream.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    outputStream.close();
+
                 }
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         }
     }
 
     private class ServerSocketThread extends Thread {
         private ServerSocket serverSocket;
-        private Socket acceptSocket;
+
 
         void init() {
             try {
+
                 serverSocket = new ServerSocket(8080);
-                while (acceptSocket == null || !acceptSocket.isConnected()) {
-                    acceptSocket = serverSocket.accept();
 
-                    if (acceptSocket.isConnected()) {
+                while (true) {
+                    Socket acceptSocket = serverSocket.accept();
 
+                    new ServerThread(acceptSocket).start();
 
-                        while (true) {
-                            DataInputStream dataInputStream = new DataInputStream(acceptSocket.getInputStream());
-                            while (true) {
-                                String msg = dataInputStream.readLine();
-
-                                if (msg != null) {
-                                    Looper.prepare();
-                                    Message message = Message.obtain();
-                                    message.obj = new String(msg);
-                                    handler.sendMessage(message);
-                                    Looper.loop();
-                                }
-                            }
-
-                        }
-
-                    }
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("serverSocket", "IOException\t" + e.getLocalizedMessage());
             }
         }
 
@@ -249,6 +221,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void run() {
             super.run();
             init();
+        }
+    }
+
+    private class ServerThread extends Thread {
+        private Socket acceptSocket;
+
+        public ServerThread(Socket serverSocket) {
+            this.acceptSocket = serverSocket;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            try {
+                DataInputStream dataInputStream = new DataInputStream(acceptSocket.getInputStream());
+
+                String msg = dataInputStream.readUTF();
+
+                if (msg != null) {
+                    Log.e("ServerSocket", "receive msg\t" + msg);
+                    Looper.prepare();
+                    Message message = Message.obtain();
+                    message.obj = new String(msg);
+                    handler.sendMessage(message);
+                    Looper.loop();
+                }
+                dataInputStream.close();
+                acceptSocket.shutdownInput();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
